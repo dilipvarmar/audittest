@@ -1,0 +1,264 @@
+HQ-G4SReader# show run
+: Saved
+
+: 
+: Serial Number: JAD213302JR
+: Hardware:   ASA5506, 4096 MB RAM, CPU Atom C2000 series 1250 MHz, 1 CPU (4 cores)
+:
+ASA Version 9.16(4) 
+!
+hostname HQ-G4SReader
+enable password ***** encrypted
+service-module 1 keepalive-timeout 4
+service-module 1 keepalive-counter 6
+service-module sfr keepalive-timeout 4
+service-module sfr keepalive-counter 6
+names
+no mac-address auto
+
+!
+interface GigabitEthernet1/1
+ nameif outside
+ security-level 0
+ ip address 204.44.191.136 255.255.255.240 
+!
+interface GigabitEthernet1/2
+ nameif inside
+ security-level 100
+ ip address 192.168.4.1 255.255.255.0 
+!
+interface GigabitEthernet1/3
+ nameif g4s
+ security-level 100
+ ip address 192.168.200.1 255.255.255.0 
+!
+interface GigabitEthernet1/4
+ shutdown
+ no nameif
+ no security-level
+ no ip address
+!
+interface GigabitEthernet1/5
+ shutdown
+ no nameif
+ no security-level
+ no ip address
+!
+interface GigabitEthernet1/6
+ shutdown
+ no nameif
+ no security-level
+ no ip address
+!
+interface GigabitEthernet1/7
+ shutdown
+ no nameif
+ no security-level
+ no ip address
+!
+interface GigabitEthernet1/8
+ shutdown
+ no nameif
+ no security-level
+ no ip address
+!
+interface Management1/1
+ management-only
+ no nameif
+ no security-level
+ no ip address
+!
+banner exec *****************************************************************************
+banner exec *                           NOTICE TO USERS                                 *
+banner exec *     THIS IS A PRIVATE COMPUTER SYSTEM. It is for authorized use only.     *
+banner exec *     Users (authorized or unauthorized) have no explicit or implicit       *
+banner exec *     expectation of privacy.                                               *
+banner exec *     Any or all uses of this system and all files on this system may       *
+banner exec *     be intercepted, monitored, recorded, copied, audited, inspected,      *
+banner exec *     and disclosed to authorized site and law enforcement personnel,       *
+banner exec *     as well as authorized officials of other agencies, both domestic      *
+banner exec *     and foreign.  By using this system, the user consents to such         *
+banner exec *     interception, monitoring, recording, copying, auditing, inspection,   *
+banner exec *     and disclosure at the discretion of authorized site personnel.        *
+banner exec *     Unauthorized or improper use of this system may result in             *
+banner exec *     administrative disciplinary action and civil and criminal penalties.  *
+banner exec *     By continuing to use this system you indicate your awareness of and   *
+banner exec *     consent to these terms and conditions of use.   LOG OFF IMMEDIATELY   *
+banner exec *     if you do not agree to the conditions stated in this warning.         *
+banner exec *****************************************************************************
+banner login *****************************************************************************
+banner login *                           NOTICE TO USERS                                 *
+banner login *     THIS IS A PRIVATE COMPUTER SYSTEM. It is for authorized use only.     *
+banner login *     Users (authorized or unauthorized) have no explicit or implicit       *
+banner login *     expectation of privacy.                                               *
+banner login *     Any or all uses of this system and all files on this system may       *
+banner login *     be intercepted, monitored, recorded, copied, audited, inspected,      *
+banner login *     and disclosed to authorized site and law enforcement personnel,       *
+banner login *     as well as authorized officials of other agencies, both domestic      *
+banner login *     and foreign.  By using this system, the user consents to such         *
+banner login *     interception, monitoring, recording, copying, auditing, inspection,   *
+banner login *     and disclosure at the discretion of authorized site personnel.        *
+banner login *     Unauthorized or improper use of this system may result in             *
+banner login *     administrative disciplinary action and civil and criminal penalties.  *
+banner login *     By continuing to use this system you indicate your awareness of and   *
+banner login *     consent to these terms and conditions of use.   LOG OFF IMMEDIATELY   *
+banner login *     if you do not agree to the conditions stated in this warning.         *
+banner login *****************************************************************************
+boot system disk0:/asa9-16-4-lfbff-k8.SPA
+boot system disk0:/asa9-14-4-7-lfbff-k8.SPA
+no ftp mode passive
+clock timezone ChST 10
+dns domain-lookup outside
+dns server-group DefaultDNS
+ name-server 8.8.8.8 
+ name-server 8.8.4.4 
+same-security-traffic permit inter-interface
+object network host-192.168.4.38
+ host 192.168.4.38
+object network net-192.168.25.0_28
+ subnet 192.168.25.0 255.255.255.248
+object network net-192.168.28.0_24
+ subnet 192.168.28.0 255.255.255.0
+ description # 28CX #
+object network host-192.168.4.10
+ host 192.168.4.10
+object network obj-10.10.10.0
+ subnet 10.10.10.0 255.255.255.0
+object network obj-10th-floor
+ subnet 10.10.10.0 255.255.255.0
+object network tyco_ip_192.168.200
+ subnet 192.168.200.0 255.255.255.0
+object network CCTV_NETWORK
+ subnet 10.10.10.0 255.255.255.0
+access-list HQG4S-READER-to-CPC_G4SReader_VPN extended permit ip any4 object net-192.168.25.0_28 
+access-list VPN001 extended permit ip host 192.168.4.38 192.168.25.0 255.255.255.240 
+access-list cap extended permit ip any4 any4 
+access-list HQ-G4SReader_to_28CX-G4SReader extended permit ip any4 192.168.28.0 255.255.255.0 
+access-list cctv extended permit ip any4 any4 
+access-list cctv extended deny ip any4 any4 log 
+access-list cloudvue extended permit ip 192.168.200.0 255.255.255.0 host 45.223.161.40 
+access-list cloudvue extended permit ip host 45.223.161.40 192.168.200.0 255.255.255.0 
+access-list g4s_access_in extended permit ip 10.10.10.0 255.255.255.0 any 
+pager lines 24
+logging asdm informational
+mtu outside 1500
+mtu inside 1500
+mtu g4s 1500
+icmp unreachable rate-limit 1 burst-size 1
+icmp permit any g4s
+no asdm history enable
+arp timeout 14400
+no arp permit-nonconnected
+arp rate-limit 16384
+nat (inside,outside) source static host-192.168.4.38 host-192.168.4.38 destination static net-192.168.25.0_28 net-192.168.25.0_28 no-proxy-arp
+nat (inside,outside) source static host-192.168.4.38 host-192.168.4.38 destination static net-192.168.28.0_24 net-192.168.28.0_24 no-proxy-arp
+nat (inside,outside) source static host-192.168.4.10 host-192.168.4.10 destination static net-192.168.25.0_28 net-192.168.25.0_28 no-proxy-arp
+nat (inside,outside) source static host-192.168.4.10 host-192.168.4.10 destination static net-192.168.28.0_24 net-192.168.28.0_24 no-proxy-arp
+nat (g4s,outside) source dynamic CCTV_NETWORK interface
+!
+object network tyco_ip_192.168.200
+ nat (g4s,outside) dynamic interface
+access-group g4s_access_in in interface g4s
+route outside 0.0.0.0 0.0.0.0 204.44.191.129 1
+route g4s 10.10.10.0 255.255.255.0 192.168.200.2 1
+timeout xlate 3:00:00
+timeout pat-xlate 0:00:30
+timeout conn 1:00:00 half-closed 0:10:00 udp 0:02:00 sctp 0:02:00 icmp 0:00:02
+timeout sunrpc 0:10:00 h323 0:05:00 h225 1:00:00 mgcp 0:05:00 mgcp-pat 0:05:00
+timeout sip 0:30:00 sip_media 0:02:00 sip-invite 0:03:00 sip-disconnect 0:02:00
+timeout sip-provisional-media 0:02:00 uauth 0:05:00 absolute
+timeout tcp-proxy-reassembly 0:01:00
+timeout floating-conn 0:00:00
+timeout conn-holddown 0:00:15
+timeout igp stale-route 0:01:10
+user-identity default-domain LOCAL
+aaa authentication ssh console LOCAL 
+aaa authentication login-history
+no snmp-server location
+no snmp-server contact
+service sw-reset-button
+crypto ipsec ikev1 transform-set ifit esp-aes esp-sha-hmac 
+crypto ipsec security-association pmtu-aging infinite
+crypto map bog 10 match address VPN001
+crypto map bog 10 set peer 202.128.76.211 67.98.161.187 
+crypto map bog 10 set ikev1 transform-set ifit
+crypto map bog 20 match address HQ-G4SReader_to_28CX-G4SReader
+crypto map bog 20 set peer 202.151.82.239 
+crypto map bog 20 set ikev1 transform-set ifit
+crypto map bog interface outside
+crypto ca trustpool policy
+crypto ikev1 enable outside
+crypto ikev1 am-disable
+crypto ikev1 policy 10
+ authentication pre-share
+ encryption aes
+ hash sha     
+ group 14
+ lifetime 86400
+telnet timeout 5
+ssh stricthostkeycheck
+ssh timeout 60
+ssh version 2
+ssh key-exchange group dh-group1-sha1
+ssh 64.86.75.227 255.255.255.255 outside
+ssh 69.44.203.195 255.255.255.255 outside
+console timeout 0
+
+dhcpd auto_config outside
+!
+threat-detection basic-threat
+threat-detection statistics access-list
+no threat-detection statistics tcp-intercept
+dynamic-access-policy-record DfltAccessPolicy
+username qualys password ***** encrypted
+username quinatjl password ***** encrypted privilege 15
+username vc.scan password ***** encrypted privilege 15
+username garridna password ***** encrypted privilege 15
+username serinern password ***** encrypted privilege 15
+username syslog password ***** encrypted privilege 15
+username untalaav password ***** encrypted privilege 15
+tunnel-group 202.128.76.211 type ipsec-l2l
+tunnel-group 202.128.76.211 ipsec-attributes
+ ikev1 pre-shared-key *****
+tunnel-group 67.98.161.187 type ipsec-l2l
+tunnel-group 67.98.161.187 ipsec-attributes
+ ikev1 pre-shared-key *****
+tunnel-group 202.151.82.239 type ipsec-l2l
+tunnel-group 202.151.82.239 ipsec-attributes
+ ikev1 pre-shared-key *****
+!
+class-map inspection_default
+ match default-inspection-traffic
+!
+!
+policy-map type inspect dns preset_dns_map
+ parameters
+  message-length maximum client auto
+  message-length maximum 512
+  no tcp-inspection
+policy-map global_policy
+ class inspection_default
+  inspect dns preset_dns_map 
+  inspect ftp 
+  inspect h323 h225 
+  inspect h323 ras 
+  inspect rsh 
+  inspect rtsp 
+  inspect esmtp 
+  inspect sqlnet 
+  inspect skinny 
+  inspect sunrpc 
+  inspect xdmcp 
+  inspect sip  
+  inspect netbios 
+  inspect tftp 
+  inspect ip-options 
+  inspect icmp 
+  inspect snmp 
+!
+service-policy global_policy global
+prompt hostname context 
+no call-home reporting anonymous
+Cryptochecksum:b0308bc6b27a77bbc15efe8c6b8c2fe1
+: end
+HQ-G4SReader#
